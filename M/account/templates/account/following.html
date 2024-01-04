@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+	<h2 class="text-center">{{ user.username }} Followers</h2>
+    {% if request.user.is_authenticated %}
+    <div>
+        {% for follow in following %}
+            <a href="{% url 'account:user_profile' follow.to_user.id %}" class="btn btn-success col-md-2 mb-1">{{ follow.to_user }} - {{ follow.created|timesince }} ago</a>
+            <br>
+            {% empty %}
+            <p class="alert alert-info text-center">you dont have following</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+{% endblock %}

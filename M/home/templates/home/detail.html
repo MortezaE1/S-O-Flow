@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    {% if request.user.id == post.user.id %}
+        <a href="{% url 'home:post_delete' post.id %}" class="btn btn-danger">Delete</a>
+        <a href="{% url 'home:post_update' post.id %}" class="btn btn-info">Update</a>
+    {% endif %}
+	<div>
+    <p><a href="{% url 'account:user_profile' post.user.id %}">{{ post.user.username }}</a> - {{ post.updated|date:"Y-m-d - G:i" }}</p>
+        <p>{{ post.body }}</p>
+    </div>
+    <hr>
+    {% if request.user.is_authenticated %}
+        <a href="{% url 'home:like_post' post.id post.slug %}" class="btn btn-primary {% if can_like %}disabled {% endif %}">Like {{ post.count_like }}</a>
+        <form action="" method="post" class="col-md-4" novalidate>
+            {% csrf_token %}
+            {{ form.as_p }}
+            <input type="submit" value="send" class="btn btn-success">
+        </form>
+    {% else %}
+        <p class="alert alert-danger col-md-6">Only logged in user can comment. </p>
+    {% endif %}
+    <br>
+    <p>{{ post.count_comment }} comments</p>
+    {% for comment in comments %}
+    	<div class="card bg-dark text-white">
+            <p class="card-header">  {{ comment.user }} | {{ comment.created|timesince }} ago </p>
+            <p class="card-body">{{ comment.body }}</p>
+            {% if request.user.is_authenticated %}
+                <form action="{% url 'home:reply_comment' post.id comment.id %}" novalidate method="post" style="display: none">
+                    {% csrf_token %}
+                    {{ reply_form }}
+                    <input type="submit" value="send" class="btn btn-success">
+                </form>
+            {% endif %} 
+            {% with comment.rcomments.all|dictsort:'created' as replies %}
+                {% for reply in replies %}
+                    <p class="bg-primary p-3 m-2">{{ reply.user }} <br> {{ reply.body }}</p>
+                {% endfor %}
+            {% endwith %}
+
+        </div>
+        <br>
+    {% empty %}
+        <p>No comment yet!</p>
+    {% endfor %}
+
+
+{% endblock %}
